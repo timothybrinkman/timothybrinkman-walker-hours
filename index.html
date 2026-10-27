@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Crew Hours">
+<title>Walker Crew Hours</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23111'/%3E%3Cpath d='M12 18h8l5 22 7-22h0l7 22 5-22h8l-9 30h-8l-6-19-6 19h-8z' fill='%23f5b800'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23111'/%3E%3Cpath d='M34 50h22l14 62 20-62 20 62 14-62h22l-25 84h-22l-17-53-17 53h-22z' fill='%23f5b800'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#efeee9; --card:#ffffff; --ink:#1b1b1b; --muted:#6b6a66; --line:#dcdad3;
+  --head:#111111; --accent:#f5b800; --accent-ink:#111; --good:#1f8a4c; --warn:#b86e00; --bad:#c0392b;
+  --chip:#f3f2ee; --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#141414;--card:#1e1e1e;--ink:#eeeeea;--muted:#a3a29c;--line:#333;--chip:#2a2a2a;--shadow:none;--warn:#e0a03a;--bad:#e5675a;--good:#4cc27e}
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+header{background:var(--head);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 16px 0;position:sticky;top:0;z-index:20}
+.hrow{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto}
+.brand{flex:1;min-width:0}
+.brand .co{font-size:11px;letter-spacing:.18em;font-weight:800;color:var(--accent)}
+.brand .app{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.sync{font-size:11px;color:#bbb;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:#888;display:inline-block}
+.dot.on{background:#3ddc84}.dot.off{background:#f5b800}
+.me{background:#2a2a2a;color:#fff;border:0;border-radius:20px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav{display:flex;gap:2px;overflow-x:auto;max-width:1100px;margin:8px auto 0;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:0;color:#aaa;font:inherit;font-weight:600;padding:10px 12px 12px;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+nav button.on{color:#fff;border-color:var(--accent)}
+main{max-width:1100px;margin:0 auto;padding:16px 16px calc(env(safe-area-inset-bottom) + 40px)}
+h2{font-size:18px;margin:4px 0 10px}
+h3{font-size:18px;margin:4px 0 6px}
+.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.center{text-align:center}
+.lbl{font-size:11px;letter-spacing:.12em;font-weight:700;color:var(--muted);text-transform:uppercase;margin:2px 0 6px}
+.muted{color:var(--muted)}.small{font-size:13px}
+.warn{color:var(--warn);font-weight:600}.bad{color:var(--bad);font-weight:600}.good{color:var(--good);font-weight:600}
+.warnbox{background:rgba(245,184,0,.15);border:1px solid rgba(245,184,0,.5);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;padding:10px 14px;border-radius:10px;cursor:pointer;min-height:42px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.dark{background:var(--head);border-color:var(--head);color:#fff}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn.xl{width:100%;font-size:18px;padding:16px;margin-top:10px;min-height:58px;border-radius:12px}
+.btn.sm{padding:6px 10px;min-height:32px;font-size:13px}
+.btn.block{width:100%;margin-top:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row>.btn{flex:1}
+.clocked{border:2px solid var(--accent)}
+.big{font-size:52px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.jobn{font-size:20px;font-weight:700;margin-top:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow)}
+.kpi b{display:block;font-size:26px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:820px){.grid2{grid-template-columns:1fr 1fr}}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.list li:first-child{border-top:0}
+.list .grow{flex:1;min-width:0}
+.list .t{font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.num{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.bar{display:grid;grid-template-columns:minmax(90px,38%) 1fr 56px;align-items:center;gap:8px;margin:7px 0;font-size:14px}
+.bar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{background:var(--chip);border-radius:6px;height:12px;overflow:hidden}
+.track div{background:var(--accent);height:100%;border-radius:6px}
+.bar b{text-align:right;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.chip{border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:20px;padding:9px 13px;font:inherit;font-size:14px;cursor:pointer}
+.chip.on{background:var(--head);color:#fff;border-color:var(--head)}
+@media (prefers-color-scheme: dark){.chip.on{background:var(--accent);color:#111;border-color:var(--accent)}}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--chip);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.pill.y{background:rgba(245,184,0,.2);color:var(--warn)}.pill.r{background:rgba(192,57,43,.15);color:var(--bad)}.pill.g{background:rgba(31,138,76,.15);color:var(--good)}
+.weeknav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.weeknav .w{flex:1;text-align:center;font-weight:700}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--card)}
+tr.click{cursor:pointer}tr.click:hover td{background:var(--chip)}
+td.ot{color:var(--warn);font-weight:700}
+tfoot td{font-weight:800}
+label.f{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+textarea{min-height:70px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:50;align-items:flex-end;justify-content:center}
+#modal.open{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 18px calc(env(safe-area-inset-bottom) + 18px)}
+@media(min-width:620px){#modal{align-items:center}.sheet{border-radius:18px}}
+.scanbox{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:1/1;margin:10px 0}
+.scanbox video{width:100%;height:100%;object-fit:cover}
+.scanframe{position:absolute;inset:18%;border:3px solid var(--accent);border-radius:14px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.eqrow{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;display:grid;gap:8px}
+.poster{background:#fff;color:#111;text-align:center;padding:18px;border:2px solid #111;border-radius:14px}
+.poster .pbrand{font-weight:900;letter-spacing:.22em;font-size:13px}
+.poster .ptitle{font-size:26px;font-weight:800;margin-top:8px;line-height:1.15}
+.poster .psub{color:#555;margin-top:2px}
+.poster .qr{margin:14px auto;max-width:300px}
+.poster .qr svg{width:100%;height:auto;display:block}
+.poster .pscan{background:#111;color:#f5b800;font-weight:900;letter-spacing:.12em;padding:10px;border-radius:8px;font-size:16px}
+.poster .purl{font-size:10px;color:#777;margin-top:8px;word-break:break-all}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%) translateY(120px);background:#111;color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;transition:transform .25s;z-index:60;max-width:90vw;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;color:var(--muted);padding:18px}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.pick .btn{justify-content:flex-start;text-align:left}
+@media print{
+  body *{visibility:hidden}
+  #poster,#poster *{visibility:visible}
+  #poster{position:fixed;left:0;top:0;width:100%;border:0;padding:40px}
+  #poster .qr{max-width:480px}
+  #poster .ptitle{font-size:44px}
+  #poster .pscan{font-size:28px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="brand"><div class="co">WALKER FOUNDATIONS</div><div class="app">Crew Hours</div></div>
+    <div class="sync" id="sync"></div>
+    <button class="me" id="mebtn" onclick="meMenu()"></button>
+  </div>
+  <nav id="nav"></nav>
+</header>
+<main id="app"></main>
+<div id="modal" onclick="if(event.target===this)closeModal()"></div>
+<div id="toast"></div>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/* ===================== CONFIG / CONSTANTS ===================== */
+const LS_KEY='wf_hours_v1', LS_ME='wf_hours_me', LS_FB='wf_hours_fb';
+const COLS=['employees','jobs','entries','equipment','equiplogs'];
+const TASKS=['Footings','Walls / forming','Rebar','Pour','Stripping forms','Flatwork','Finishing','Backfill / prep','Drive time','Shop / yard','Other'];
+const JOB_TYPES=['Commercial','Residential','Agricultural','Internal'];
+const DEFAULT_SETTINGS={company:'Walker Foundations, Inc.',otThreshold:40,weekStart:1,baseUrl:'',gpsRadius:400,requireQR:true};
+const S={employees:[],jobs:[],entries:[],equipment:[],equiplogs:[],settings:{...DEFAULT_SETTINGS}};
+const UI={tab:null,weekOffset:0,me:null,mode:'local',tsEmp:null,pendingJob:null,loc:null,lastTask:null,jobFilter:'active'};
+const FB={user:null,db:null,auth:null,loaded:{},unsubs:[],ready:false,denied:false};
+const SCAN={active:false,stream:null};
+
+/* ===================== HELPERS ===================== */
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=(p='')=>p+Date.now().toString(36).slice(-5)+Math.random().toString(36).slice(2,7);
+const emp=id=>S.employees.find(e=>e.id===id);
+const job=id=>S.jobs.find(j=>j.id===id);
+const equip=id=>S.equipment.find(e=>e.id===id);
+const getMe=()=>emp(UI.me);
+const activeEmps=()=>S.employees.filter(e=>e.active!==false);
+const openEntryFor=id=>S.entries.find(e=>e.empId===id&&!e.end);
+const entryHours=(e,now=Date.now())=>Math.max(0,((e.end||now)-e.start)/36e5-(e.breakMin||0)/60);
+const sumH=arr=>arr.reduce((a,e)=>a+entryHours(e),0);
+const fH=h=>(Math.round(h*100)/100).toFixed(2);
+const money=n=>'$'+Math.round(n).toLocaleString();
+function fmtDur(ms){ms=Math.max(0,ms);const m=Math.floor(ms/6e4);return Math.floor(m/60)+':'+String(m%60).padStart(2,'0')}
+const fmtTime=ts=>new Date(ts).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+const fmtDate=ts=>new Date(ts).toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+const fmtShort=ts=>new Date(ts).toLocaleDateString([],{month:'short',day:'numeric'});
+const dayStart=ts=>{const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime()};
+const addDays=(ts,n)=>{const d=new Date(ts);d.setDate(d.getDate()+n);return d.getTime()};
+function weekStart(off=0){const d=new Date();d.setHours(0,0,0,0);const ws=+(S.settings.weekStart??1);d.setDate(d.getDate()-((d.getDay()-ws+7)%7)+off*7);return d.getTime()}
+const weekRange=off=>{const s=weekStart(off);return [s,addDays(s,7)]};
+const entriesIn=(s,e,f)=>S.entries.filter(x=>x.start>=s&&x.start<e&&(!f||f(x)));
+function pay(empId,s,e){const p=emp(empId)||{};const total=sumH(entriesIn(s,e,x=>x.empId===empId));const th=+S.settings.otThreshold||40;const reg=Math.min(total,th),ot=Math.max(0,total-th);const rate=+p.rate||0;return{total,reg,ot,cost:reg*rate+ot*rate*1.5}}
+function dist(a,b,c,d){const R=6371e3,r=x=>x*Math.PI/180;const dl=r(c-a),dn=r(d-b);const h=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+function parsePin(t){t=String(t||'');let m=t.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/)||t.match(/[?&](?:q|ll|query)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/)||t.match(/(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/);return m?{lat:+m[1],lng:+m[2]}:null}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2600)}
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('Could not load '+src));document.head.appendChild(s)})}
+function getLoc(){return new Promise(res=>{if(!navigator.geolocation)return res(null);let done=false;const t=setTimeout(()=>{if(!done){done=true;res(null)}},9000);navigator.geolocation.getCurrentPosition(p=>{if(done)return;done=true;clearTimeout(t);res({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)})},()=>{if(done)return;done=true;clearTimeout(t);res(null)},{enableHighAccuracy:true,timeout:8500,maximumAge:60000})})}
+const appBase=()=>(S.settings.baseUrl||location.href.split('#')[0].split('?')[0]);
+const jobUrl=id=>appBase()+'?job='+encodeURIComponent(id);
+function download(name,text,type='text/csv'){const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+const csvCell=v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+const toCSV=rows=>rows.map(r=>r.map(csvCell).join(',')).join('\n');
+const clean=o=>JSON.parse(JSON.stringify(o));
+
+/* ===================== STORE ===================== */
+function persist(){if(UI.mode==='local'){try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){toast('Storage full — export a backup')}}}
+const Store={
+  put(col,doc){
+    const arr=S[col];const i=arr.findIndex(x=>x.id===doc.id);if(i>=0)arr[i]=doc;else arr.push(doc);
+    if(UI.mode==='firebase'){FB.db.collection(col).doc(doc.id).set(clean(doc)).catch(e=>toast('Sync error: '+e.code))}
+    else persist();
+  },
+  del(col,id){
+    S[col]=S[col].filter(x=>x.id!==id);
+    if(UI.mode==='firebase'){FB.db.collection(col).doc(id).delete().catch(e=>toast('Sync error: '+e.code))}
+    else persist();
+  },
+  setting(k,v){
+    S.settings[k]=v;
+    if(UI.mode==='firebase'){FB.db.collection('config').doc('app').set({[k]:v},{merge:true}).catch(e=>toast('Sync error: '+e.code))}
+    else persist();
+  }
+};
+
+/* ===================== FIREBASE CREW SYNC ===================== */
+async function startFirebase(cfg){
+  const v='10.12.2',b=`https://www.gstatic.com/firebasejs/${v}/`;
+  await loadScript(b+'firebase-app-compat.js');
+  await loadScript(b+'firebase-auth-compat.js');
+  await loadScript(b+'firebase-firestore-compat.js');
+  firebase.initializeApp(cfg);
+  FB.auth=firebase.auth();FB.db=firebase.firestore();
+  try{await FB.db.enablePersistence({synchronizeTabs:true})}catch(e){}
+  UI.mode='firebase';
+  COLS.forEach(c=>S[c]=[]);
+  FB.auth.getRedirectResult().catch(e=>toast('Sign-in: '+e.message));
+  FB.auth.onAuthStateChanged(u=>{FB.user=u;FB.unsubs.forEach(f=>f());FB.unsubs=[];FB.loaded={};UI.me=null;FB.denied=false;if(u)subscribe();render()});
+  window.addEventListener('online',renderHeader);window.addEventListener('offline',renderHeader);
+}
+function subscribe(){
+  const cutoff=addDays(Date.now(),-180);
+  COLS.forEach(col=>{
+    let q=FB.db.collection(col);
+    if(col==='entries')q=q.where('start','>=',cutoff);
+    FB.unsubs.push(q.onSnapshot(snap=>{S[col]=snap.docs.map(d=>d.data());FB.loaded[col]=true;resolveMe();render()},err=>{FB.denied=true;render()}));
+  });
+  FB.unsubs.push(FB.db.collection('config').doc('app').onSnapshot(d=>{S.settings={...DEFAULT_SETTINGS,...(d.data()||{})};render()},()=>{}));
+}
+let bootstrapping=false;
+async function resolveMe(){
+  if(!FB.user||!COLS.every(c=>FB.loaded[c]))return;
+  const email=(FB.user.email||'').toLowerCase();
+  const me=S.employees.find(e=>(e.email||'').toLowerCase()===email);
+  if(me){UI.me=me.id;return}
+  if(bootstrapping)return;bootstrapping=true;
+  try{
+    const r=await FB.db.collection('roles').doc(email).get();
+    if(r.exists){const e={id:uid('e'),name:FB.user.displayName||email,email,role:r.data().role||'office',crew:'Office',rate:0,phone:'',active:true};Store.put('employees',e);await FB.db.collection('roles').doc(email).set({role:e.role,empId:e.id},{merge:true});UI.me=e.id;render()}
+  }catch(e){}
+  bootstrapping=false;
+}
+function signIn(){
+  const p=new firebase.auth.GoogleAuthProvider();
+  const standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+  if(standalone)return FB.auth.signInWithRedirect(p);
+  FB.auth.signInWithPopup(p).catch(e=>{if(/popup/.test(e.code))FB.auth.signInWithRedirect(p);else toast(e.message)});
+}
+function syncRole(e,oldEmail){
+  if(UI.mode!=='firebase')return;
+  const r=FB.db.collection('roles');
+  if(oldEmail&&oldEmail!==(e.email||'').toLowerCase())r.doc(oldEmail).delete().catch(()=>{});
+  if(e.email){if(e.active===false)r.doc(e.email.toLowerCase()).delete().catch(()=>{});else r.doc(e.email.toLowerCase()).set({role:e.role,empId:e.id}).catch(()=>{})}
+}
+
+/* ===================== DEMO SEED ===================== */
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function seed(){
+  const R=rng(7);
+  S.settings={...DEFAULT_SETTINGS};
+  S.employees=[
+    {id:'e01',name:'Jill Hansen',role:'office',crew:'Office',rate:0,email:'',phone:''},
+    {id:'e02',name:'Mike Novak',role:'foreman',crew:'Walls',rate:32,email:'',phone:''},
+    {id:'e03',name:'Tyler Kudron',role:'worker',crew:'Walls',rate:25,email:'',phone:''},
+    {id:'e04',name:'Jesse Wemhoff',role:'worker',crew:'Walls',rate:23,email:'',phone:''},
+    {id:'e05',name:'Luis Ortega',role:'worker',crew:'Walls',rate:24,email:'',phone:''},
+    {id:'e06',name:'Brent Schaecher',role:'foreman',crew:'Flatwork',rate:31,email:'',phone:''},
+    {id:'e07',name:'Cody Ernst',role:'worker',crew:'Flatwork',rate:24,email:'',phone:''},
+    {id:'e08',name:'Alex Pfeifer',role:'worker',crew:'Flatwork',rate:21,email:'',phone:''},
+    {id:'e09',name:'Sam Dohmen',role:'worker',crew:'Flatwork',rate:22,email:'',phone:''},
+    {id:'e10',name:'Ryan Loseke',role:'foreman',crew:'Basements',rate:30,email:'',phone:''},
+    {id:'e11',name:'Jake Sueper',role:'worker',crew:'Basements',rate:23,email:'',phone:''},
+    {id:'e12',name:'Nate Kosch',role:'worker',crew:'Basements',rate:22,email:'',phone:''}
+  ].map(e=>({...e,active:true}));
+  S.jobs=[
+    {id:'jhog01',name:'Hog Barn – Humphrey',customer:'Prairie Pork LLC',address:'Humphrey, NE',type:'Agricultural',lat:41.6914,lng:-97.4864,foremanId:'e02',status:'active'},
+    {id:'jbnk02',name:'Bunker Walls – Platte Center',customer:'Platte Center Feedyard',address:'Platte Center, NE',type:'Agricultural',lat:41.5389,lng:-97.4887,foremanId:'e02',status:'active'},
+    {id:'jcom03',name:'Commercial Bldg – Hwy 81',customer:'Lakeview Storage Co.',address:'Hwy 81, Columbus, NE',type:'Commercial',lat:41.4630,lng:-97.3640,foremanId:'e06',status:'active'},
+    {id:'jbas04',name:'Basement – 33rd Ave',customer:'Henderson residence',address:'33rd Ave, Columbus, NE',type:'Residential',lat:41.4440,lng:-97.3500,foremanId:'e10',status:'active'},
+    {id:'jbas05',name:'Basement – Lost Creek',customer:'Miller residence',address:'Lost Creek Pkwy, Columbus, NE',type:'Residential',lat:41.4580,lng:-97.3920,foremanId:'e10',status:'active'},
+    {id:'jshop0',name:'Shop / Yard',customer:'Walker Foundations',address:'2770 54th Ave, Columbus, NE',type:'Internal',lat:41.4545,lng:-97.3720,foremanId:'',status:'active'}
+  ];
+  S.equipment=[
+    {id:'q1',name:'Skid Steer #3',type:'Skid steer',meter:2140.5,interval:250,lastService:2000},
+    {id:'q2',name:'Telehandler #1',type:'Telehandler',meter:3881.2,interval:500,lastService:3500},
+    {id:'q3',name:'Mini Excavator #2',type:'Excavator',meter:1595.0,interval:250,lastService:1350},
+    {id:'q4',name:'Boom Pump',type:'Concrete pump',meter:6118.4,interval:250,lastService:5850},
+    {id:'q5',name:'Laser Screed',type:'Screed',meter:840.3,interval:100,lastService:780}
+  ];
+  const crews={
+    Walls:{jobs:['jhog01','jhog01','jbnk02'],tasks:['Footings','Walls / forming','Rebar','Walls / forming','Pour','Stripping forms'],eq:['q2','q4'],long:true},
+    Flatwork:{jobs:['jcom03'],tasks:['Backfill / prep','Rebar','Flatwork','Pour','Finishing'],eq:['q5','q1'],long:false},
+    Basements:{jobs:['jbas04','jbas05'],tasks:['Footings','Walls / forming','Pour','Stripping forms','Backfill / prep'],eq:['q3','q1'],long:false}
+  };
+  S.entries=[];S.equiplogs=[];
+  const now=Date.now();
+  const meterBack={};S.equipment.forEach(q=>meterBack[q.id]=q.meter);
+  const eqLogs=[];
+  for(let d=13;d>=0;d--){
+    const day=addDays(dayStart(now),-d);const dow=new Date(day).getDay();
+    if(dow===0)continue;
+    Object.entries(crews).forEach(([crew,c],ci)=>{
+      if(dow===6&&!(c.long&&R()<0.7))return;
+      const jobId=c.jobs[(13-d+ci)%c.jobs.length];
+      const t1=c.tasks[(13-d)%c.tasks.length],t2=c.tasks[(14-d)%c.tasks.length];
+      const isPour=t1==='Pour'||t2==='Pour';
+      const members=S.employees.filter(e=>e.crew===crew);
+      members.forEach(m=>{
+        if(m.role!=='foreman'&&R()<0.06)return;
+        const start=day+(7*60+Math.round(R()*25-10))*6e4;
+        const len=(dow===6?5:(c.long?10:9)+(isPour?1.2:0)+R()*0.8)*36e5;
+        const mid=start+(dow===6?len:4.75*36e5);
+        const end=start+len+(dow===6?0:30*6e4);
+        const j=job(jobId);const jit=()=>(R()-0.5)*0.0012;
+        const off=(d===4&&m.id==='e08');
+        const base={empId:m.id,jobId,notes:'',source:'qr',lat:j.lat+jit()+(off?0.03:0),lng:j.lng+jit(),acc:Math.round(8+R()*20)};
+        base.dist=Math.round(dist(base.lat,base.lng,j.lat,j.lng));base.offsite=base.dist>S.settings.gpsRadius;
+        const segs=dow===6?[[start,end,t1,0]]:[[start,mid,t1,0],[mid,end,t2,30]];
+        segs.forEach(([a,b,t,br])=>{
+          if(a>now)return;
+          const e={...base,id:uid('t'),task:t,start:a,end:b>now?null:b,breakMin:b>now?0:br};
+          S.entries.push(e);
+        });
+        if(m.role==='foreman'&&end<=now){
+          c.eq.forEach(qid=>{if(R()<0.75){const hrs=Math.round((2+R()*5)*10)/10;eqLogs.push({qid,empId:m.id,jobId,ts:end,hrs})}});
+        }
+      });
+    });
+  }
+  // build equipment logs backward so meters line up
+  eqLogs.sort((a,b)=>b.ts-a.ts).forEach(l=>{const m=meterBack[l.qid];S.equiplogs.push({id:uid('l'),eqId:l.qid,empId:l.empId,jobId:l.jobId,ts:l.ts,meter:Math.round(m*10)/10,hours:l.hrs,issue:'',resolved:false});meterBack[l.qid]=m-l.hrs});
+  const lastPump=S.equiplogs.find(l=>l.eqId==='q4');if(lastPump){lastPump.issue='Outrigger hydraulic leak, slow on boom raise';}
+  const lastSkid=S.equiplogs.find(l=>l.eqId==='q1');if(lastSkid){lastSkid.issue='Left track loose';lastSkid.resolved=true;}
+  persist();
+}
+
+/* ===================== RENDER ===================== */
+function tabsFor(role){
+  if(role==='office')return[['dash','Dashboard'],['time','Timesheets'],['jobs','Jobs'],['people','Crew'],['equip','Equipment'],['settings','Settings']];
+  if(role==='foreman')return[['clock','Clock'],['crew','My Crew'],['mine','My Hours'],['equip','Equipment']];
+  return[['clock','Clock'],['mine','My Hours']];
+}
+function renderHeader(){
+  const me=getMe();
+  let s='';
+  if(UI.mode==='local')s='<span class="dot off"></span>Demo · on this device';
+  else s=`<span class="dot ${navigator.onLine?'on':'off'}"></span>${navigator.onLine?'Synced':'Offline – will sync'}`;
+  $('#sync').innerHTML=s;
+  $('#mebtn').style.display=(me||UI.mode==='firebase'&&FB.user)?'':'none';
+  $('#mebtn').textContent=me?('👤 '+me.name.split(' ')[0]+(UI.mode==='local'?' ▾':'')):(FB.user?'Sign out':'');
+  const tabs=me?tabsFor(me.role):[];
+  if(me&&!tabs.find(t=>t[0]===UI.tab))UI.tab=tabs[0][0];
+  $('#nav').innerHTML=tabs.map(([k,l])=>`<button class="${UI.tab===k?'on':''}" onclick="go('${k}')">${l}</button>`).join('');
+}
+function go(t){UI.tab=t;UI.tsEmp=null;render();scrollTo(0,0)}
+function render(){
+  renderHeader();
+  const app=$('#app');
+  if(UI.mode==='firebase'){
+    if(!FB.user){app.innerHTML=viewSignin();return}
+    if(FB.denied&&!getMe()){app.innerHTML=viewNoAccess();return}
+    if(!COLS.every(c=>FB.loaded[c])){app.innerHTML='<div class="empty">Loading crew data…</div>';return}
+    if(!getMe()){app.innerHTML=viewNoAccess();return}
+  }else if(!getMe()){app.innerHTML=viewPicker();return}
+  const v={clock:viewClock,mine:viewMine,crew:viewCrew,dash:viewDash,time:viewTime,jobs:viewJobs,people:viewPeople,equip:viewEquip,settings:viewSettings}[UI.tab];
+  app.innerHTML=v?v():'';
+  if(UI.pendingJob){const j=UI.pendingJob;UI.pendingJob=null;if(job(j))setTimeout(()=>sheetClockIn(j),60);else toast('That job code was not found')}
+}
+setInterval(()=>$$('[data-since]').forEach(el=>el.textContent=fmtDur(Date.now()-+el.dataset.since)),10000);
+
+/* ---------- identity ---------- */
+function viewPicker(){
+  const groups=[['foreman','Foremen'],['worker','Crew'],['office','Office']];
+  return `<div class="card"><h2>Who's using this phone?</h2><p class="muted small">Demo mode — tap anyone to see the app the way they would. With crew sync turned on, everyone signs in with their Google account instead.</p>
+  ${groups.map(([r,l])=>`<div class="lbl" style="margin-top:14px">${l}</div><div class="pick">${activeEmps().filter(e=>e.role===r).map(e=>`<button class="btn" onclick="pickMe('${e.id}')">${esc(e.name)}<span class="muted small">${esc(e.crew||'')}</span></button>`).join('')}</div>`).join('')}</div>`;
+}
+function pickMe(id){UI.me=id;try{localStorage.setItem(LS_ME,id)}catch(e){}UI.tab=null;render()}
+function meMenu(){
+  if(UI.mode==='local'){UI.me=null;try{localStorage.removeItem(LS_ME)}catch(e){}render();return}
+  if(confirm('Sign out of Crew Hours?'))FB.auth.signOut();
+}
+function viewSignin(){return `<div class="card center" style="margin-top:30px"><h2>Walker Foundations Crew Hours</h2><p class="muted">Sign in with the Google account the office has on file for you.</p><button class="btn primary xl" onclick="signIn()">Sign in with Google</button></div>`}
+function viewNoAccess(){return `<div class="card center" style="margin-top:30px"><h2>Not set up yet</h2><p class="muted">${esc(FB.user?.email)} isn't on the crew list. Ask the office to add this email under Crew, then reopen the app.</p><button class="btn" onclick="FB.auth.signOut()">Use a different account</button></div>`}
+
+/* ---------- CLOCK (worker / foreman) ---------- */
+function viewClock(){
+  const me=getMe();const open=openEntryFor(me.id);let h='';
+  if(open){
+    const j=job(open.jobId);
+    h+=`<div class="card clocked center"><div class="lbl">On the clock</div><div class="big" data-since="${open.start}">${fmtDur(Date.now()-open.start)}</div>
+    <div class="jobn">${esc(j?.name||'Unknown job')}</div><div class="muted">${esc(open.task)} · since ${fmtTime(open.start)}${open.offsite?' · <span class="warn">off-site</span>':''}</div>
+    <div class="row"><button class="btn" onclick="sheetSwitchTask()">Switch task</button><button class="btn" onclick="startScan()">📷 Scan new job</button></div>
+    <button class="btn danger xl" onclick="sheetClockOut('${open.id}')">Clock out</button></div>`;
+  }else{
+    h+=`<div class="card center"><div class="lbl">Off the clock</div>
+    <button class="btn primary xl" onclick="startScan()">📷 Scan job QR to clock in</button>
+    <p class="muted small">Or point your phone camera at the QR poster at the job site.</p>
+    ${!S.settings.requireQR||me.role!=='worker'?`<button class="btn block" onclick="sheetPickJob()">Pick job from list</button>`:''}</div>`;
+  }
+  const t0=dayStart(Date.now());const today=entriesIn(t0,addDays(t0,1),e=>e.empId===me.id).sort((a,b)=>a.start-b.start);
+  const [ws,we]=weekRange(0);const p=pay(me.id,ws,we);
+  h+=`<div class="kpis"><div class="kpi"><span>Today</span><b>${fH(sumH(today))}</b></div><div class="kpi"><span>This week</span><b>${fH(p.total)}</b></div><div class="kpi"><span>Overtime</span><b class="${p.ot?'warn':''}">${fH(p.ot)}</b></div></div>`;
+  h+=`<div class="card"><div class="lbl">Today</div>${today.length?`<ul class="list">${today.map(entryLi).join('')}</ul>`:'<div class="empty">Nothing logged yet today.</div>'}</div>`;
+  return h;
+}
+function entryLi(e,opts={}){
+  const j=job(e.jobId);const p=emp(e.empId);
+  return `<li><div class="grow"><div class="t">${opts.who?esc(p?.name)+' · ':''}${esc(j?.name||'?')}</div><div class="muted small">${esc(e.task)} · ${fmtTime(e.start)}–${e.end?fmtTime(e.end):'<span class="good">now</span>'}${e.breakMin?` · ${e.breakMin}m break`:''}${e.offsite?' · <span class="warn">off-site</span>':''}${e.source==='edited'||e.source==='manual'?` · <span class="pill">${e.source}</span>`:''}</div></div>
+  <div class="num">${fH(entryHours(e))}</div>${opts.edit?`<button class="btn sm" onclick="editEntry('${e.id}')">Edit</button>`:''}</li>`;
+}
+
+/* ---------- QR SCAN ---------- */
+async function startScan(){
+  openModal(`<h3>Scan job QR</h3><div class="scanbox"><video id="scanv" playsinline muted></video><div class="scanframe"></div></div><p class="muted small center" id="scanmsg">Point at the QR poster at the job site</p><button class="btn block" onclick="closeModal()">Cancel</button>`);
+  const msg=t=>{const m=$('#scanmsg');if(m)m.textContent=t};
+  try{SCAN.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})}
+  catch(e){msg('Camera not available here. Use your phone\'s camera app on the poster instead — it opens this app on the right job.');return}
+  const v=$('#scanv');if(!v){stopScan();return}
+  v.srcObject=SCAN.stream;try{await v.play()}catch(e){}
+  let detect=null;
+  if('BarcodeDetector' in window){try{const bd=new BarcodeDetector({formats:['qr_code']});detect=async()=>{const r=await bd.detect(v);return r[0]?.rawValue}}catch(e){}}
+  if(!detect){
+    try{if(!window.jsQR)await loadScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js');
+      const c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
+      detect=async()=>{if(!v.videoWidth)return;const sc=Math.min(1,640/v.videoWidth);c.width=v.videoWidth*sc;c.height=v.videoHeight*sc;ctx.drawImage(v,0,0,c.width,c.height);const d=ctx.getImageData(0,0,c.width,c.height);return jsQR(d.data,c.width,c.height)?.data};
+    }catch(e){msg('Scanner needs a connection the first time. Use your phone camera on the poster instead.');return}
+  }
+  SCAN.active=true;
+  const loop=async()=>{if(!SCAN.active)return;try{const val=await detect();if(val){const id=parseJobId(val);if(id&&job(id)){stopScan();if(navigator.vibrate)navigator.vibrate(60);sheetClockIn(id);return}else msg('That code isn\'t a Walker job poster')}}catch(e){}setTimeout(loop,220)};
+  loop();
+}
+function stopScan(){SCAN.active=false;if(SCAN.stream)SCAN.stream.getTracks().forEach(t=>t.stop());SCAN.stream=null}
+function parseJobId(v){try{const u=new URL(v);return u.searchParams.get('job')}catch(e){const m=String(v).match(/job[=:]([\w-]+)/);return m?m[1]:(job(v)?v:null)}}
+
+/* ---------- CLOCK IN / OUT SHEETS ---------- */
+function taskChips(sel){return `<div class="chips" id="taskchips">${TASKS.map(t=>`<button class="chip ${t===sel?'on':''}" onclick="pickChip(this)">${esc(t)}</button>`).join('')}</div>`}
+function pickChip(b){b.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));b.classList.add('on')}
+const chosenChip=id=>$(`#${id} .chip.on`)?.textContent;
+function sheetPickJob(){
+  const jobs=S.jobs.filter(j=>j.status==='active');
+  openModal(`<h3>Pick a job</h3><ul class="list">${jobs.map(j=>`<li onclick="sheetClockIn('${j.id}')" style="cursor:pointer"><div class="grow"><div class="t">${esc(j.name)}</div><div class="muted small">${esc(j.customer)}</div></div><span class="muted">›</span></li>`).join('')}</ul><button class="btn block" onclick="closeModal()">Cancel</button>`);
+}
+function sheetClockIn(jobId){
+  const me=getMe();const j=job(jobId);if(!me||!j)return;
+  const open=openEntryFor(me.id);
+  if(open&&open.jobId===jobId){sheetClockOut(open.id);return}
+  UI.loc=null;
+  openModal(`<div class="lbl">Clock in</div><h3>${esc(j.name)}</h3><div class="muted small">${esc(j.customer)} · ${esc(j.address)}</div>
+  ${j.status!=='active'?'<div class="warnbox">This job is marked complete. Check with your foreman.</div>':''}
+  ${open?`<div class="warnbox">You'll be clocked out of <b>${esc(job(open.jobId)?.name)}</b> first.</div>`:''}
+  <div class="lbl" style="margin-top:14px">What are you working on?</div>${taskChips(UI.lastTask||TASKS[1])}
+  <div class="muted small" id="gpsline">📍 Checking location…</div>
+  <button class="btn primary xl" onclick="doClockIn('${jobId}')">Clock in</button><button class="btn block" onclick="closeModal()">Cancel</button>`);
+  getLoc().then(loc=>{UI.loc=loc;const g=$('#gpsline');if(!g)return;
+    if(!loc){g.textContent='📍 Location unavailable — clock-in will be saved without it.';return}
+    if(j.lat==null){g.textContent=`📍 Location captured (±${loc.acc} m)`;return}
+    const d=dist(loc.lat,loc.lng,j.lat,j.lng);const far=d>S.settings.gpsRadius;
+    g.innerHTML=far?`<span class="warn">📍 You're about ${d>1609?(d/1609).toFixed(1)+' mi':Math.round(d)+' m'} from this job — it'll be flagged for the office.</span>`:`<span class="good">📍 On site</span> (±${loc.acc} m)`;
+  });
+}
+function locFields(jobId){
+  const loc=UI.loc,j=job(jobId);if(!loc)return{};
+  const o={lat:loc.lat,lng:loc.lng,acc:loc.acc};
+  if(j&&j.lat!=null){o.dist=Math.round(dist(loc.lat,loc.lng,j.lat,j.lng));o.offsite=o.dist>S.settings.gpsRadius}
+  return o;
+}
+function doClockIn(jobId){
+  const me=getMe();const task=chosenChip('taskchips')||'Other';const now=Date.now();
+  const open=openEntryFor(me.id);
+  if(open){open.end=now;Store.put('entries',open)}
+  Store.put('entries',{id:uid('t'),empId:me.id,jobId,task,start:now,end:null,breakMin:0,notes:'',source:'qr',...locFields(jobId)});
+  UI.lastTask=task;closeModal();render();toast('Clocked in · '+job(jobId).name);
+}
+function sheetSwitchTask(){
+  const me=getMe();const open=openEntryFor(me.id);if(!open)return;
+  openModal(`<div class="lbl">Switch task</div><h3>${esc(job(open.jobId)?.name)}</h3><p class="muted small">Now: ${esc(open.task)}</p>${taskChips('')}
+  <button class="btn primary xl" onclick="doSwitchTask()">Switch</button><button class="btn block" onclick="closeModal()">Cancel</button>`);
+}
+function doSwitchTask(){
+  const me=getMe();const open=openEntryFor(me.id);const task=chosenChip('taskchips');if(!task){toast('Pick a task');return}
+  const now=Date.now();open.end=now;Store.put('entries',open);
+  const {id,end,breakMin,notes,...rest}=open;
+  Store.put('entries',{...rest,id:uid('t'),task,start:now,end:null,breakMin:0,notes:'',source:'switch'});
+  UI.lastTask=task;closeModal();render();toast('Switched to '+task);
+}
+function eqOptions(sel){return S.equipment.map(q=>`<option value="${q.id}" ${q.id===sel?'selected':''}>${esc(q.name)} (last ${(+q.meter).toFixed(1)})</option>`).join('')}
+function addEqRow(){
+  if(!S.equipment.length){toast('No machines set up yet');return}
+  const d=document.createElement('div');d.className='eqrow';
+  d.innerHTML=`<select class="eqsel">${eqOptions()}</select><input class="eqm" type="number" step="0.1" inputmode="decimal" placeholder="Hour meter reading now"><input class="eqi" placeholder="Problem for the shop? (optional)">`;
+  $('#eqrows').appendChild(d);
+}
+function sheetClockOut(entryId,byLead){
+  const e=S.entries.find(x=>x.id===entryId);if(!e)return;
+  const p=emp(e.empId),j=job(e.jobId);const elapsed=(Date.now()-e.start)/36e5;
+  const def=elapsed>5?30:0;
+  openModal(`<div class="lbl">Clock out${byLead?' · '+esc(p.name):''}</div><h3>${esc(j?.name)}</h3>
+  <p class="muted small">${esc(e.task)} · in at ${fmtTime(e.start)} · ${fmtDur(Date.now()-e.start)} so far</p>
+  <div class="lbl" style="margin-top:12px">Unpaid break / lunch</div>
+  <div class="chips" id="brk">${[0,15,30,45,60].map(m=>`<button class="chip ${m===def?'on':''}" onclick="pickChip(this)">${m} min</button>`).join('')}</div>
+  <label class="f">Notes (optional)</label><textarea id="conotes" placeholder="Anything the office should know">${esc(e.notes||'')}</textarea>
+  ${byLead?'':`<div class="lbl" style="margin-top:14px">Run any equipment today?</div><div id="eqrows"></div><button class="btn sm" onclick="addEqRow()">+ Add machine hours</button>`}
+  <button class="btn danger xl" onclick="doClockOut('${entryId}',${!!byLead})">Clock out</button><button class="btn block" onclick="closeModal()">Cancel</button>`);
+}
+function doClockOut(entryId,byLead){
+  const e=S.entries.find(x=>x.id===entryId);if(!e)return;
+  e.end=Date.now();e.breakMin=parseInt(chosenChip('brk'))||0;e.notes=$('#conotes').value.trim();
+  if(byLead){e.source='edited';e.editedBy=getMe().name}
+  Store.put('entries',e);
+  $$('#eqrows .eqrow').forEach(r=>{const q=r.querySelector('.eqsel').value,m=r.querySelector('.eqm').value,i=r.querySelector('.eqi').value.trim();if(m||i)recordEquip(q,m,i,e.empId,e.jobId,e.end)});
+  closeModal();render();toast(`Clocked out · ${fH(entryHours(e))} hrs`);
+}
+function recordEquip(eqId,meter,issue,empId,jobId,ts){
+  const q=equip(eqId);if(!q)return;const m=parseFloat(meter);
+  let hours=null;if(!isNaN(m)){hours=Math.round(Math.max(0,m-(+q.meter||0))*10)/10;if(m>=(+q.meter||0)){q.meter=m;Store.put('equipment',q)}}
+  Store.put('equiplogs',{id:uid('l'),eqId,empId,jobId,ts,meter:isNaN(m)?null:m,hours,issue:issue||'',resolved:false});
+  if(!isNaN(m)&&hours>24)toast(`Check ${q.name} meter — ${hours} hrs since last reading`);
+}
+
+/* ---------- MY HOURS ---------- */
+function weekNav(){const [s,e]=weekRange(UI.weekOffset);return `<div class="weeknav"><button class="btn sm" onclick="UI.weekOffset--;render()">‹ Prev</button><div class="w">${UI.weekOffset===0?'This week':UI.weekOffset===-1?'Last week':'Week of'} · ${fmtShort(s)}–${fmtShort(addDays(e,-1))}</div><button class="btn sm" onclick="UI.weekOffset++;render()" ${UI.weekOffset>=0?'disabled':''}>Next ›</button></div>`}
+function viewMine(){
+  const me=getMe();const [s,e]=weekRange(UI.weekOffset);const p=pay(me.id,s,e);
+  let h=weekNav()+`<div class="kpis"><div class="kpi"><span>Total</span><b>${fH(p.total)}</b></div><div class="kpi"><span>Regular</span><b>${fH(p.reg)}</b></div><div class="kpi"><span>Overtime</span><b class="${p.ot?'warn':''}">${fH(p.ot)}</b></div></div>`;
+  for(let i=0;i<7;i++){const d=addDays(s,i);const es=entriesIn(d,addDays(d,1),x=>x.empId===me.id).sort((a,b)=>a.start-b.start);if(!es.length)continue;
+    h+=`<div class="card"><div class="lbl" style="display:flex;justify-content:space-between"><span>${fmtDate(d)}</span><span>${fH(sumH(es))} hrs</span></div><ul class="list">${es.map(x=>entryLi(x)).join('')}</ul></div>`}
+  if(!entriesIn(s,e,x=>x.empId===me.id).length)h+='<div class="card empty">No hours this week.</div>';
+  h+='<p class="muted small center">See something wrong? Tell your foreman — they can fix it.</p>';
+  return h;
+}
+
+/* ---------- FOREMAN: MY CREW ---------- */
+function crewOf(me){return activeEmps().filter(e=>e.crew===me.crew&&e.role!=='office')}
+function viewCrew(){
+  const me=getMe();const crew=crewOf(me);const ids=new Set(crew.map(c=>c.id));
+  const myJobs=S.jobs.filter(j=>j.status==='active'&&j.foremanId===me.id);const jobIds=new Set(myJobs.map(j=>j.id));
+  const open=S.entries.filter(e=>!e.end&&(ids.has(e.empId)||jobIds.has(e.jobId)));
+  const t0=dayStart(Date.now());const today=entriesIn(t0,addDays(t0,1),e=>ids.has(e.empId)||jobIds.has(e.jobId)).sort((a,b)=>b.start-a.start);
+  const notIn=crew.filter(c=>!today.some(e=>e.empId===c.id));
+  let h=`<div class="row" style="margin:0 0 14px"><button class="btn primary" onclick="editEntry(null)">+ Add time for crew</button><button class="btn" onclick="logEquip()">Log machine hours</button></div>`;
+  h+=`<div class="card"><div class="lbl">On the clock now · ${open.length}</div>${open.length?`<ul class="list">${open.map(e=>`<li><div class="grow"><div class="t">${esc(emp(e.empId)?.name)}</div><div class="muted small">${esc(job(e.jobId)?.name)} · ${esc(e.task)} · in ${fmtTime(e.start)}${e.offsite?' · <span class="warn">off-site</span>':''}</div></div><div class="num" data-since="${e.start}">${fmtDur(Date.now()-e.start)}</div><button class="btn sm" onclick="sheetClockOut('${e.id}',true)">Clock out</button></li>`).join('')}</ul>`:'<div class="empty">Nobody clocked in.</div>'}</div>`;
+  if(notIn.length)h+=`<div class="card"><div class="lbl">No time today</div><div class="muted">${notIn.map(c=>esc(c.name)).join(', ')}</div></div>`;
+  h+=`<div class="card"><div class="lbl">Today's entries</div>${today.length?`<ul class="list">${today.map(e=>entryLi(e,{who:1,edit:1})).join('')}</ul>`:'<div class="empty">No entries yet today.</div>'}</div>`;
+  if(myJobs.length)h+=`<div class="card"><div class="lbl">Your jobs · QR posters</div><ul class="list">${myJobs.map(j=>`<li><div class="grow"><div class="t">${esc(j.name)}</div><div class="muted small">${esc(j.customer)}</div></div><button class="btn sm" onclick="showQR('${j.id}')">QR</button></li>`).join('')}</ul></div>`;
+  return h;
+}
+
+/* ---------- OFFICE: DASHBOARD ---------- */
+function bars(map,total){const rows=Object.entries(map).sort((a,b)=>b[1]-a[1]);if(!rows.length)return '<div class="empty">No hours.</div>';const max=rows[0][1]||1;return rows.map(([k,v])=>`<div class="bar"><span title="${esc(k)}">${esc(k)}</span><div class="track"><div style="width:${(v/max*100).toFixed(1)}%"></div></div><b>${fH(v)}</b></div>`).join('')}
+function serviceStatus(q){const due=(+q.lastService||0)+(+q.interval||0);const left=due-(+q.meter||0);return{due,left,cls:left<=0?'r':left<=25?'y':'g',txt:left<=0?`Overdue ${Math.abs(left).toFixed(0)} hrs`:left<=25?`Due in ${left.toFixed(0)} hrs`:`${left.toFixed(0)} hrs to service`}}
+function viewDash(){
+  const [s,e]=weekRange(UI.weekOffset);const wk=entriesIn(s,e);const now=Date.now();
+  const open=S.entries.filter(x=>!x.end);const t0=dayStart(now);
+  let cost=0,ot=0;const risk=[];
+  activeEmps().forEach(p=>{const r=pay(p.id,s,e);cost+=r.cost;ot+=r.ot;if(UI.weekOffset===0&&r.total>=(+S.settings.otThreshold-6)&&r.total>0)risk.push([p,r])});
+  const byJob={},byTask={};wk.forEach(x=>{const h=entryHours(x);const jn=job(x.jobId)?.name||'?';byJob[jn]=(byJob[jn]||0)+h;byTask[x.task]=(byTask[x.task]||0)+h});
+  const off=wk.filter(x=>x.offsite);
+  const svc=S.equipment.filter(q=>serviceStatus(q).cls!=='g');
+  const issues=S.equiplogs.filter(l=>l.issue&&!l.resolved);
+  let h=weekNav();
+  h+=`<div class="kpis">
+   <div class="kpi"><span>On the clock now</span><b>${open.length}</b></div>
+   <div class="kpi"><span>Hours today</span><b>${fH(sumH(S.entries.filter(x=>x.start>=t0)))}</b></div>
+   <div class="kpi"><span>Hours this week</span><b>${fH(sumH(wk))}</b></div>
+   <div class="kpi"><span>Overtime hrs</span><b class="${ot?'warn':''}">${fH(ot)}</b></div>
+   <div class="kpi"><span>Labor cost (w/ OT)</span><b>${money(cost)}</b></div></div>`;
+  h+=`<div class="grid2"><div class="card"><div class="lbl">On the clock now</div>${open.length?`<ul class="list">${open.sort((a,b)=>a.start-b.start).map(x=>`<li><div class="grow"><div class="t">${esc(emp(x.empId)?.name)}</div><div class="muted small">${esc(job(x.jobId)?.name)} · ${esc(x.task)}${x.offsite?' · <span class="warn">off-site</span>':''}</div></div><div class="num" data-since="${x.start}">${fmtDur(now-x.start)}</div></li>`).join('')}</ul>`:'<div class="empty">Nobody is clocked in right now.</div>'}</div>
+  <div class="card"><div class="lbl">Heads-up</div><ul class="list">
+   ${risk.sort((a,b)=>b[1].total-a[1].total).map(([p,r])=>`<li><span class="pill ${r.ot?'r':'y'}">${r.ot?'OT':'Near OT'}</span><div class="grow">${esc(p.name)}</div><div class="num">${fH(r.total)} hrs</div></li>`).join('')}
+   ${off.slice(0,5).map(x=>`<li><span class="pill y">Off-site</span><div class="grow">${esc(emp(x.empId)?.name)} · ${esc(job(x.jobId)?.name)}<div class="muted small">${fmtDate(x.start)} ${fmtTime(x.start)} · ${x.dist>1609?(x.dist/1609).toFixed(1)+' mi':x.dist+' m'} away</div></div><button class="btn sm" onclick="editEntry('${x.id}')">View</button></li>`).join('')}
+   ${svc.map(q=>{const st=serviceStatus(q);return `<li><span class="pill ${st.cls}">Service</span><div class="grow">${esc(q.name)}</div><div class="small ${st.cls==='r'?'bad':'warn'}">${st.txt}</div></li>`}).join('')}
+   ${issues.map(l=>`<li><span class="pill r">Shop</span><div class="grow">${esc(equip(l.eqId)?.name)}<div class="muted small">${esc(l.issue)} — ${esc(emp(l.empId)?.name)}, ${fmtShort(l.ts)}</div></div></li>`).join('')}
+   ${!risk.length&&!off.length&&!svc.length&&!issues.length?'<li class="muted">All clear.</li>':''}
+  </ul></div></div>`;
+  h+=`<div class="grid2"><div class="card"><div class="lbl">Hours by job</div>${bars(byJob)}</div><div class="card"><div class="lbl">Hours by task</div>${bars(byTask)}</div></div>`;
+  return h;
+}
+
+/* ---------- OFFICE: TIMESHEETS ---------- */
+function viewTime(){
+  const [s,e]=weekRange(UI.weekOffset);const days=[...Array(7)].map((_,i)=>addDays(s,i));
+  const ppl=activeEmps().filter(p=>p.role!=='office'||entriesIn(s,e,x=>x.empId===p.id).length);
+  let tot={reg:0,ot:0,total:0,cost:0};const dayTot=Array(7).fill(0);
+  const rows=ppl.map(p=>{const r=pay(p.id,s,e);tot.reg+=r.reg;tot.ot+=r.ot;tot.total+=r.total;tot.cost+=r.cost;
+    const dh=days.map((d,i)=>{const v=sumH(entriesIn(d,addDays(d,1),x=>x.empId===p.id));dayTot[i]+=v;return v});
+    const flag=entriesIn(s,e,x=>x.empId===p.id&&(x.offsite||!x.end)).length;
+    return `<tr class="click" onclick="UI.tsEmp='${p.id}';render()"><td>${esc(p.name)}${flag?' <span class="pill y">!</span>':''}</td>${dh.map(v=>`<td>${v?fH(v):'<span class="muted">–</span>'}</td>`).join('')}<td><b>${fH(r.total)}</b></td><td>${fH(r.reg)}</td><td class="${r.ot?'ot':''}">${fH(r.ot)}</td><td>${money(r.cost)}</td></tr>`}).join('');
+  let h=weekNav()+`<div class="row" style="margin:0 0 12px"><button class="btn" onclick="exportPayroll()">⬇ Payroll CSV</button><button class="btn" onclick="exportDetail()">⬇ Detail CSV</button><button class="btn" onclick="editEntry(null)">+ Add entry</button></div>`;
+  h+=`<div class="card"><div class="tbl-wrap"><table><thead><tr><th>Employee</th>${days.map(d=>`<th>${new Date(d).toLocaleDateString([],{weekday:'short'})}<br>${new Date(d).getDate()}</th>`).join('')}<th>Total</th><th>Reg</th><th>OT</th><th>Cost</th></tr></thead><tbody>${rows}</tbody>
+  <tfoot><tr><td>Total</td>${dayTot.map(v=>`<td>${fH(v)}</td>`).join('')}<td>${fH(tot.total)}</td><td>${fH(tot.reg)}</td><td class="${tot.ot?'ot':''}">${fH(tot.ot)}</td><td>${money(tot.cost)}</td></tr></tfoot></table></div>
+  <p class="muted small">OT is anything over ${S.settings.otThreshold} hrs in the week, costed at 1.5×. Tap a name for their entries. <span class="pill y">!</span> = off-site clock-in or still clocked in.</p></div>`;
+  if(UI.tsEmp){const p=emp(UI.tsEmp);const es=entriesIn(s,e,x=>x.empId===p.id).sort((a,b)=>a.start-b.start);
+    h+=`<div class="card"><div style="display:flex;align-items:center;gap:8px"><h3 style="flex:1">${esc(p.name)}</h3><button class="btn sm" onclick="editEntry(null,'${p.id}')">+ Add</button><button class="btn sm" onclick="UI.tsEmp=null;render()">Close</button></div>
+    ${es.length?days.map(d=>{const de=es.filter(x=>x.start>=d&&x.start<addDays(d,1));return de.length?`<div class="lbl" style="margin-top:10px">${fmtDate(d)} · ${fH(sumH(de))} hrs</div><ul class="list">${de.map(x=>entryLi(x,{edit:1})).join('')}</ul>`:''}).join(''):'<div class="empty">No entries this week.</div>'}</div>`}
+  return h;
+}
+function exportPayroll(){
+  const [s,e]=weekRange(UI.weekOffset);const days=[...Array(7)].map((_,i)=>addDays(s,i));
+  const rows=[['Employee','Crew','Rate',...days.map(d=>new Date(d).toLocaleDateString()),'Total','Regular','Overtime','Gross (est.)']];
+  activeEmps().forEach(p=>{const r=pay(p.id,s,e);if(!r.total)return;rows.push([p.name,p.crew,p.rate,...days.map(d=>fH(sumH(entriesIn(d,addDays(d,1),x=>x.empId===p.id)))),fH(r.total),fH(r.reg),fH(r.ot),r.cost.toFixed(2)])});
+  download(`walker-payroll-${new Date(s).toISOString().slice(0,10)}.csv`,toCSV(rows));
+}
+function exportDetail(){
+  const [s,e]=weekRange(UI.weekOffset);
+  const rows=[['Date','Employee','Crew','Job','Customer','Task','In','Out','Break min','Hours','Source','Off-site','Distance m','Notes']];
+  entriesIn(s,e).sort((a,b)=>a.start-b.start).forEach(x=>{const p=emp(x.empId)||{},j=job(x.jobId)||{};rows.push([new Date(x.start).toLocaleDateString(),p.name,p.crew,j.name,j.customer,x.task,fmtTime(x.start),x.end?fmtTime(x.end):'OPEN',x.breakMin||0,fH(entryHours(x)),x.source||'',x.offsite?'YES':'',x.dist??'',x.notes||''])});
+  download(`walker-time-detail-${new Date(s).toISOString().slice(0,10)}.csv`,toCSV(rows));
+}
+
+/* ---------- ENTRY EDIT (foreman / office) ---------- */
+const hhmm=ts=>{const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+const ymd=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function editEntry(id,presetEmp){
+  const me=getMe();const x=id?S.entries.find(e=>e.id===id):null;
+  const pool=me.role==='foreman'?crewOf(me):activeEmps();
+  const empSel=x?.empId||presetEmp||pool[0]?.id;
+  const start=x?.start||dayStart(Date.now())+7*36e5;
+  openModal(`<h3>${x?'Edit time entry':'Add time entry'}</h3>
+  ${x&&x.offsite?`<div class="warnbox">Clocked in about ${x.dist>1609?(x.dist/1609).toFixed(1)+' mi':x.dist+' m'} from the job site.${x.lat?` <a href="https://maps.google.com/?q=${x.lat},${x.lng}" target="_blank" rel="noopener">See on map</a>`:''}</div>`:''}
+  ${x&&x.editedBy?`<p class="muted small">Last edited by ${esc(x.editedBy)}</p>`:''}
+  <label class="f">Employee</label><select id="ee_emp">${pool.map(p=>`<option value="${p.id}" ${p.id===empSel?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+  <label class="f">Job</label><select id="ee_job">${S.jobs.filter(j=>j.status==='active'||j.id===x?.jobId).map(j=>`<option value="${j.id}" ${j.id===x?.jobId?'selected':''}>${esc(j.name)}</option>`).join('')}</select>
+  <label class="f">Task</label><select id="ee_task">${TASKS.map(t=>`<option ${t===x?.task?'selected':''}>${esc(t)}</option>`).join('')}</select>
+  <label class="f">Date</label><input id="ee_date" type="date" value="${ymd(start)}">
+  <div class="f3"><div><label class="f">In</label><input id="ee_in" type="time" value="${hhmm(start)}"></div><div><label class="f">Out</label><input id="ee_out" type="time" value="${x?(x.end?hhmm(x.end):''):'15:30'}"></div><div><label class="f">Break min</label><input id="ee_brk" type="number" inputmode="numeric" value="${x?.breakMin??30}"></div></div>
+  <p class="muted small">Leave Out empty if they're still on the clock.</p>
+  <label class="f">Notes</label><textarea id="ee_notes">${esc(x?.notes||'')}</textarea>
+  <div class="row"><button class="btn primary" onclick="saveEntry(${x?`'${x.id}'`:'null'})">Save</button>${x?`<button class="btn danger" onclick="delEntry('${x.id}')">Delete</button>`:''}<button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function saveEntry(id){
+  const me=getMe();const date=$('#ee_date').value;const tin=$('#ee_in').value,tout=$('#ee_out').value;
+  if(!date||!tin){toast('Date and In time are required');return}
+  const [y,mo,d]=date.split('-').map(Number);const mk=t=>{const [h,m]=t.split(':').map(Number);return new Date(y,mo-1,d,h,m).getTime()};
+  const start=mk(tin);let end=tout?mk(tout):null;if(end&&end<=start)end=addDays(end,1);
+  const empId=$('#ee_emp').value;
+  if(!end){const o=openEntryFor(empId);if(o&&o.id!==id){toast(emp(empId).name+' is already clocked in');return}}
+  const x=id?S.entries.find(e=>e.id===id):{id:uid('t'),source:'manual',notes:''};
+  Object.assign(x,{empId,jobId:$('#ee_job').value,task:$('#ee_task').value,start,end,breakMin:parseInt($('#ee_brk').value)||0,notes:$('#ee_notes').value.trim(),editedBy:me.name});
+  if(id&&x.source!=='manual')x.source='edited';
+  Store.put('entries',x);closeModal();render();toast('Saved');
+}
+function delEntry(id){if(!confirm('Delete this time entry?'))return;Store.del('entries',id);closeModal();render();toast('Deleted')}
+
+/* ---------- OFFICE: JOBS ---------- */
+function jobStats(id){const es=S.entries.filter(e=>e.jobId===id);let cost=0;const byTask={},byEmp={};es.forEach(e=>{const h=entryHours(e);cost+=h*(+emp(e.empId)?.rate||0);byTask[e.task]=(byTask[e.task]||0)+h;const n=emp(e.empId)?.name||'?';byEmp[n]=(byEmp[n]||0)+h});return{hours:sumH(es),cost,byTask,byEmp,count:es.length,last:es.reduce((m,e)=>Math.max(m,e.start),0)}}
+function viewJobs(){
+  const f=UI.jobFilter;const list=S.jobs.filter(j=>f==='all'||(f==='active'?j.status==='active':j.status!=='active'));
+  let h=`<div class="row" style="margin:0 0 12px"><button class="btn primary" onclick="editJob(null)">+ New job</button>
+  <select style="flex:1;min-width:140px" onchange="UI.jobFilter=this.value;render()"><option value="active" ${f==='active'?'selected':''}>Active jobs</option><option value="done" ${f==='done'?'selected':''}>Completed</option><option value="all" ${f==='all'?'selected':''}>All</option></select></div>`;
+  h+=list.map(j=>{const st=jobStats(j.id);const on=S.entries.filter(e=>!e.end&&e.jobId===j.id).length;return `<div class="card"><div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1;min-width:0"><div class="t" style="font-weight:700;font-size:16px">${esc(j.name)}</div><div class="muted small">${esc(j.customer)} · ${esc(j.address)}</div>
+   <div style="margin-top:6px"><span class="pill">${esc(j.type)}</span> ${j.status!=='active'?'<span class="pill">Complete</span>':''} ${on?`<span class="pill g">${on} on site</span>`:''} ${j.foremanId?`<span class="muted small">Foreman: ${esc(emp(j.foremanId)?.name)}</span>`:''}</div></div>
+   <div style="text-align:right"><div class="num" style="font-size:20px">${fH(st.hours)}</div><div class="muted small">hrs · ${money(st.cost)}</div></div></div>
+   <div class="row"><button class="btn sm" onclick="showQR('${j.id}')">QR poster</button><button class="btn sm" onclick="jobDetail('${j.id}')">Breakdown</button><button class="btn sm" onclick="editJob('${j.id}')">Edit</button></div></div>`}).join('')||'<div class="card empty">No jobs here.</div>';
+  return h;
+}
+function jobDetail(id){
+  const j=job(id),st=jobStats(id);
+  openModal(`<h3>${esc(j.name)}</h3><p class="muted small">${esc(j.customer)} · ${st.count} entries${st.last?' · last '+fmtShort(st.last):''}</p>
+  <div class="kpis"><div class="kpi"><span>Total hours</span><b>${fH(st.hours)}</b></div><div class="kpi"><span>Base labor</span><b>${money(st.cost)}</b></div></div>
+  <div class="lbl">By task</div>${bars(st.byTask)}<div class="lbl" style="margin-top:12px">By person</div>${bars(st.byEmp)}
+  <p class="muted small">Base labor uses each person's straight-time rate; overtime premium shows on Timesheets.</p><button class="btn block" onclick="closeModal()">Close</button>`);
+}
+function editJob(id){
+  const j=id?job(id):{};
+  openModal(`<h3>${id?'Edit job':'New job'}</h3>
+  <label class="f">Job name</label><input id="jj_name" value="${esc(j.name||'')}" placeholder="e.g. Hog Barn – Humphrey">
+  <label class="f">Customer</label><input id="jj_cust" value="${esc(j.customer||'')}">
+  <label class="f">Address / location</label><input id="jj_addr" value="${esc(j.address||'')}">
+  <div class="f2"><div><label class="f">Type</label><select id="jj_type">${JOB_TYPES.map(t=>`<option ${t===j.type?'selected':''}>${t}</option>`).join('')}</select></div>
+  <div><label class="f">Foreman</label><select id="jj_fore"><option value="">—</option>${activeEmps().filter(e=>e.role==='foreman').map(e=>`<option value="${e.id}" ${e.id===j.foremanId?'selected':''}>${esc(e.name)}</option>`).join('')}</select></div></div>
+  <label class="f">Job site pin (for on-site check)</label><input id="jj_pin" value="${j.lat!=null?j.lat+', '+j.lng:''}" placeholder="Paste a Google/Apple Maps link or lat, lng">
+  <button class="btn sm" style="margin-top:6px" onclick="getLoc().then(l=>{if(l){$('#jj_pin').value=l.lat.toFixed(6)+', '+l.lng.toFixed(6);toast('Pin set to your location')}else toast('Location unavailable')})">📍 Use my current location</button>
+  ${id?`<label class="f">Status</label><select id="jj_status"><option value="active" ${j.status==='active'?'selected':''}>Active</option><option value="done" ${j.status!=='active'?'selected':''}>Complete</option></select>`:''}
+  <div class="row"><button class="btn primary" onclick="saveJob(${id?`'${id}'`:'null'})">Save</button>${id&&!S.entries.some(e=>e.jobId===id)?`<button class="btn danger" onclick="if(confirm('Delete job?')){Store.del('jobs','${id}');closeModal();render()}">Delete</button>`:''}<button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function saveJob(id){
+  const name=$('#jj_name').value.trim();if(!name){toast('Job name required');return}
+  const pinTxt=$('#jj_pin').value.trim();const pin=parsePin(pinTxt);if(pinTxt&&!pin){toast('Couldn\'t read that pin — try "lat, lng"');return}
+  const j=id?job(id):{id:'j'+Math.random().toString(36).slice(2,8),status:'active'};
+  Object.assign(j,{name,customer:$('#jj_cust').value.trim(),address:$('#jj_addr').value.trim(),type:$('#jj_type').value,foremanId:$('#jj_fore').value,lat:pin?pin.lat:null,lng:pin?pin.lng:null});
+  if(id)j.status=$('#jj_status').value;
+  Store.put('jobs',j);closeModal();render();toast('Job saved');if(!id)setTimeout(()=>showQR(j.id),300);
+}
+function showQR(id){
+  const j=job(id);const url=jobUrl(id);let svg='';
+  if(window.qrcode){try{const q=qrcode(0,'M');q.addData(url);q.make();svg=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){}}
+  const local=/^(file|blob|about|data):/.test(url)||/localhost|127\.0\.0\.1/.test(url);
+  openModal(`<div id="poster" class="poster"><div class="pbrand">WALKER FOUNDATIONS</div><div class="ptitle">${esc(j.name)}</div><div class="psub">${esc(j.customer)}</div>
+  <div class="qr">${svg||'<div class="empty">QR generator needs an internet connection the first time.</div>'}</div><div class="pscan">SCAN TO CLOCK IN / OUT</div><div class="purl">${esc(url)}</div></div>
+  ${local?'<div class="warnbox">This copy is running from a local file, so phones can\'t open this link yet. Host the app (see SETUP) or set the App link in Settings before printing posters.</div>':''}
+  <div class="row"><button class="btn primary" onclick="window.print()">🖨 Print poster</button><button class="btn" onclick="navigator.clipboard?.writeText('${url.replace(/'/g,"\\'")}').then(()=>toast('Link copied'))">Copy link</button><button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+
+/* ---------- OFFICE: CREW ---------- */
+function viewPeople(){
+  const [s,e]=weekRange(0);const crews={};S.employees.forEach(p=>{const c=p.active===false?'Inactive':(p.crew||'No crew');(crews[c]=crews[c]||[]).push(p)});
+  let h=`<div class="row" style="margin:0 0 12px"><button class="btn primary" onclick="editPerson(null)">+ Add person</button></div>`;
+  Object.keys(crews).sort((a,b)=>(a==='Inactive')-(b==='Inactive')||a.localeCompare(b)).forEach(c=>{
+    h+=`<div class="card"><div class="lbl">${esc(c)} · ${crews[c].length}</div><ul class="list">${crews[c].sort((a,b)=>(b.role==='foreman')-(a.role==='foreman')).map(p=>{const r=pay(p.id,s,e);const o=openEntryFor(p.id);return `<li style="cursor:pointer" onclick="editPerson('${p.id}')"><div class="grow"><div class="t">${esc(p.name)} ${p.role!=='worker'?`<span class="pill">${p.role}</span>`:''} ${o?'<span class="pill g">on clock</span>':''}</div><div class="muted small">${p.rate?'$'+p.rate+'/hr':''}${p.email?' · '+esc(p.email):UI.mode==='firebase'?' · <span class="warn">no sign-in email</span>':''}</div></div><div class="num">${fH(r.total)}<span class="muted small"> hrs wk</span></div></li>`}).join('')}</ul></div>`});
+  return h;
+}
+function editPerson(id){
+  const p=id?emp(id):{role:'worker',active:true};const crewsList=[...new Set(S.employees.map(e=>e.crew).filter(Boolean))];
+  openModal(`<h3>${id?'Edit person':'Add person'}</h3>
+  <label class="f">Name</label><input id="pp_name" value="${esc(p.name||'')}">
+  <div class="f2"><div><label class="f">Role</label><select id="pp_role">${['worker','foreman','office'].map(r=>`<option ${r===p.role?'selected':''}>${r}</option>`).join('')}</select></div>
+  <div><label class="f">Crew</label><input id="pp_crew" list="crewlist" value="${esc(p.crew||'')}"><datalist id="crewlist">${crewsList.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></div></div>
+  <div class="f2"><div><label class="f">Pay rate $/hr</label><input id="pp_rate" type="number" step="0.01" inputmode="decimal" value="${p.rate??''}"></div><div><label class="f">Phone</label><input id="pp_phone" type="tel" value="${esc(p.phone||'')}"></div></div>
+  <label class="f">Google sign-in email</label><input id="pp_email" type="email" value="${esc(p.email||'')}" placeholder="needed for crew sync">
+  ${id?`<label class="f">Status</label><select id="pp_act"><option value="1" ${p.active!==false?'selected':''}>Active</option><option value="0" ${p.active===false?'selected':''}>Inactive</option></select>`:''}
+  <div class="row"><button class="btn primary" onclick="savePerson(${id?`'${id}'`:'null'})">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function savePerson(id){
+  const name=$('#pp_name').value.trim();if(!name){toast('Name required');return}
+  const p=id?emp(id):{id:uid('e'),active:true};const oldEmail=(p.email||'').toLowerCase();
+  Object.assign(p,{name,role:$('#pp_role').value,crew:$('#pp_crew').value.trim(),rate:parseFloat($('#pp_rate').value)||0,phone:$('#pp_phone').value.trim(),email:$('#pp_email').value.trim().toLowerCase()});
+  if(id)p.active=$('#pp_act').value==='1';
+  Store.put('employees',p);syncRole(p,oldEmail);closeModal();render();toast('Saved');
+}
+
+/* ---------- EQUIPMENT ---------- */
+function viewEquip(){
+  const me=getMe();const office=me.role==='office';
+  let h=`<div class="row" style="margin:0 0 12px"><button class="btn primary" onclick="logEquip()">Log machine hours</button>${office?'<button class="btn" onclick="editEquip(null)">+ Add machine</button>':''}</div>`;
+  h+=S.equipment.map(q=>{const st=serviceStatus(q);const logs=S.equiplogs.filter(l=>l.eqId===q.id).sort((a,b)=>b.ts-a.ts);const iss=logs.filter(l=>l.issue&&!l.resolved);const wk=logs.filter(l=>l.ts>=weekStart(0)).reduce((a,l)=>a+(l.hours||0),0);
+   return `<div class="card"><div style="display:flex;gap:10px"><div style="flex:1"><div style="font-weight:700;font-size:16px">${esc(q.name)}</div><div class="muted small">${esc(q.type||'')} · service every ${q.interval} hrs</div><div style="margin-top:6px"><span class="pill ${st.cls}">${st.txt}</span> ${iss.length?`<span class="pill r">${iss.length} shop issue${iss.length>1?'s':''}</span>`:''}</div></div>
+   <div style="text-align:right"><div class="num" style="font-size:20px">${(+q.meter).toFixed(1)}</div><div class="muted small">hour meter<br>${wk.toFixed(1)} hrs this wk</div></div></div>
+   ${iss.map(l=>`<div class="warnbox" style="display:flex;gap:8px;align-items:center"><div style="flex:1">🔧 ${esc(l.issue)}<div class="muted small">${esc(emp(l.empId)?.name)} · ${fmtShort(l.ts)} · ${esc(job(l.jobId)?.name||'')}</div></div>${office||me.role==='foreman'?`<button class="btn sm" onclick="resolveIssue('${l.id}')">Fixed</button>`:''}</div>`).join('')}
+   <div class="row"><button class="btn sm" onclick="logEquip('${q.id}')">Log hours</button>${office?`<button class="btn sm" onclick="markServiced('${q.id}')">Mark serviced</button><button class="btn sm" onclick="editEquip('${q.id}')">Edit</button>`:''}<button class="btn sm" onclick="eqHistory('${q.id}')">History</button></div></div>`}).join('')||'<div class="card empty">No machines yet.</div>';
+  return h;
+}
+function logEquip(eqId){
+  if(!S.equipment.length){toast('No machines set up yet');return}
+  const me=getMe();const open=openEntryFor(me.id);
+  openModal(`<h3>Log machine hours</h3><label class="f">Machine</label><select id="lq_eq">${eqOptions(eqId)}</select>
+  <label class="f">Job</label><select id="lq_job">${S.jobs.filter(j=>j.status==='active').map(j=>`<option value="${j.id}" ${j.id===open?.jobId?'selected':''}>${esc(j.name)}</option>`).join('')}</select>
+  <label class="f">Operator</label><select id="lq_emp">${activeEmps().map(p=>`<option value="${p.id}" ${p.id===me.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+  <label class="f">Hour meter reading now</label><input id="lq_m" type="number" step="0.1" inputmode="decimal">
+  <label class="f">Problem for the shop (optional)</label><input id="lq_i" placeholder="Leaks, warning lights, damage…">
+  <div class="row"><button class="btn primary" onclick="if(!$('#lq_m').value&&!$('#lq_i').value.trim()){toast('Enter a meter reading or a problem');return}recordEquip($('#lq_eq').value,$('#lq_m').value,$('#lq_i').value.trim(),$('#lq_emp').value,$('#lq_job').value,Date.now());closeModal();render();toast('Logged')">Save</button><button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function resolveIssue(id){const l=S.equiplogs.find(x=>x.id===id);if(!l)return;l.resolved=true;l.resolvedBy=getMe().name;Store.put('equiplogs',l);render();toast('Marked fixed')}
+function markServiced(id){const q=equip(id);if(!confirm(`Mark ${q.name} serviced at ${(+q.meter).toFixed(1)} hrs?`))return;q.lastService=+q.meter;Store.put('equipment',q);Store.put('equiplogs',{id:uid('l'),eqId:id,empId:UI.me,jobId:'',ts:Date.now(),meter:+q.meter,hours:0,issue:'',service:true,resolved:true});render();toast('Service recorded')}
+function eqHistory(id){
+  const q=equip(id);const logs=S.equiplogs.filter(l=>l.eqId===id).sort((a,b)=>b.ts-a.ts).slice(0,40);
+  openModal(`<h3>${esc(q.name)} history</h3><ul class="list">${logs.map(l=>`<li><div class="grow"><div class="t">${l.service?'🛠 Serviced':esc(job(l.jobId)?.name||'—')}</div><div class="muted small">${fmtDate(l.ts)} · ${esc(emp(l.empId)?.name||'')}${l.issue?' · 🔧 '+esc(l.issue)+(l.resolved?' (fixed)':''):''}</div></div><div class="num">${l.meter!=null?(+l.meter).toFixed(1):''}${l.hours?`<div class="muted small">+${l.hours}</div>`:''}</div></li>`).join('')||'<li class="muted">No history yet.</li>'}</ul><button class="btn block" onclick="closeModal()">Close</button>`);
+}
+function editEquip(id){
+  const q=id?equip(id):{interval:250};
+  openModal(`<h3>${id?'Edit machine':'Add machine'}</h3><label class="f">Name / unit #</label><input id="qq_name" value="${esc(q.name||'')}" placeholder="e.g. Skid Steer #4">
+  <label class="f">Type</label><input id="qq_type" value="${esc(q.type||'')}">
+  <div class="f3"><div><label class="f">Hour meter</label><input id="qq_m" type="number" step="0.1" value="${q.meter??''}"></div><div><label class="f">Service every</label><input id="qq_int" type="number" value="${q.interval??250}"></div><div><label class="f">Last service at</label><input id="qq_last" type="number" step="0.1" value="${q.lastService??''}"></div></div>
+  <div class="row"><button class="btn primary" onclick="saveEquip(${id?`'${id}'`:'null'})">Save</button>${id?`<button class="btn danger" onclick="if(confirm('Remove machine?')){Store.del('equipment','${id}');closeModal();render()}">Remove</button>`:''}<button class="btn" onclick="closeModal()">Cancel</button></div>`);
+}
+function saveEquip(id){
+  const name=$('#qq_name').value.trim();if(!name){toast('Name required');return}
+  const q=id?equip(id):{id:uid('q')};const m=parseFloat($('#qq_m').value)||0;
+  Object.assign(q,{name,type:$('#qq_type').value.trim(),meter:m,interval:parseFloat($('#qq_int').value)||250,lastService:$('#qq_last').value===''?m:parseFloat($('#qq_last').value)});
+  Store.put('equipment',q);closeModal();render();toast('Saved');
+}
+
+/* ---------- SETTINGS ---------- */
+function viewSettings(){
+  const st=S.settings;const fb=localStorage.getItem(LS_FB);
+  return `<div class="card"><div class="lbl">Time rules</div>
+  <div class="f2"><div><label class="f">Overtime after (hrs / week)</label><input type="number" value="${st.otThreshold}" onchange="Store.setting('otThreshold',+this.value||40)"></div>
+  <div><label class="f">Pay week starts</label><select onchange="Store.setting('weekStart',+this.value);render()">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((d,i)=>`<option value="${i}" ${+st.weekStart===i?'selected':''}>${d}</option>`).join('')}</select></div></div>
+  <div class="f2"><div><label class="f">On-site radius (meters)</label><input type="number" value="${st.gpsRadius}" onchange="Store.setting('gpsRadius',+this.value||400)"></div>
+  <div><label class="f">Workers clock in by</label><select onchange="Store.setting('requireQR',this.value==='1')"><option value="1" ${st.requireQR?'selected':''}>QR scan only</option><option value="0" ${!st.requireQR?'selected':''}>QR or pick from list</option></select></div></div>
+  <label class="f">App link (used in QR codes)</label><input value="${esc(st.baseUrl)}" placeholder="${esc(location.href.split('?')[0])}" onchange="Store.setting('baseUrl',this.value.trim())">
+  <p class="muted small">Leave blank to use this page's address. Set it to the hosted address (e.g. GitHub Pages) before printing posters.</p></div>
+  <div class="card"><div class="lbl">Crew sync (Firebase)</div>
+  ${UI.mode==='firebase'?`<p><span class="good">Connected</span> as ${esc(FB.user?.email)}.</p><button class="btn" onclick="if(confirm('Disconnect this device from crew sync and go back to demo data?')){localStorage.removeItem('${LS_FB}');location.reload()}">Disconnect this device</button>`:
+  `<p class="muted small">Paste the Firebase web config (the <code>firebaseConfig = {…}</code> block) to switch from demo data to live crew sync with Google sign-in. Steps are in SETUP.md.</p><textarea id="fbcfg" placeholder="{ apiKey: '…', authDomain: '…', projectId: '…', … }">${esc(fb||'')}</textarea><button class="btn primary block" onclick="saveFb()">Connect crew sync</button>`}</div>
+  ${UI.mode==='local'?`<div class="card"><div class="lbl">Demo data</div><div class="row"><button class="btn" onclick="download('walker-hours-backup.json',JSON.stringify(S,null,1),'application/json')">⬇ Backup</button><button class="btn" onclick="$('#imp').click()">⬆ Restore</button><button class="btn danger" onclick="if(confirm('Reset all demo data?')){seed();render();toast('Demo data reset')}">Reset demo</button></div><input id="imp" type="file" accept=".json" hidden onchange="importBackup(this.files[0])"></div>`:''}`;
+}
+function saveFb(){
+  let t=$('#fbcfg').value.trim();const m=t.match(/\{[\s\S]*\}/);if(!m){toast('Paste the whole { … } config');return}
+  let js=m[0].replace(/\/\/.*$/gm,'').replace(/([{,]\s*)([A-Za-z_]\w*)\s*:/g,'$1"$2":').replace(/'/g,'"').replace(/,\s*}/g,'}');
+  try{const cfg=JSON.parse(js);if(!cfg.apiKey||!cfg.projectId)throw 0;localStorage.setItem(LS_FB,JSON.stringify(cfg));location.reload()}catch(e){toast('That config couldn\'t be read')}
+}
+function importBackup(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);COLS.forEach(c=>S[c]=d[c]||[]);S.settings={...DEFAULT_SETTINGS,...(d.settings||{})};persist();render();toast('Restored')}catch(e){toast('Not a valid backup')}};r.readAsText(f)}
+
+/* ---------- MODAL ---------- */
+function openModal(html){const m=$('#modal');m.innerHTML=`<div class="sheet">${html}</div>`;m.classList.add('open')}
+function closeModal(){stopScan();const m=$('#modal');m.classList.remove('open');m.innerHTML=''}
+
+/* ===================== BOOT ===================== */
+(async function boot(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('job')){UI.pendingJob=params.get('job');history.replaceState(null,'',location.pathname+location.hash)}
+  const fb=localStorage.getItem(LS_FB);
+  if(fb){
+    try{await startFirebase(JSON.parse(fb));return}
+    catch(e){UI.mode='firebase';$('#app').innerHTML=`<div class="card center" style="margin-top:30px"><h2>Can't reach crew sync</h2><p class="muted">Check your signal, then try again.</p><button class="btn primary xl" onclick="location.reload()">Try again</button></div>`;renderHeader();return}
+  }
+  try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(d&&d.employees){COLS.forEach(c=>S[c]=d[c]||[]);S.settings={...DEFAULT_SETTINGS,...(d.settings||{})}}else seed()}catch(e){seed()}
+  UI.me=localStorage.getItem(LS_ME);if(UI.me&&!emp(UI.me))UI.me=null;
+  render();
+})();
+</script>
+</body>
+</html>
