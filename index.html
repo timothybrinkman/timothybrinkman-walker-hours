@@ -9,8 +9,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Crew Hours">
 <title>Walker Crew Hours</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23111'/%3E%3Cpath d='M12 18h8l5 22 7-22h0l7 22 5-22h8l-9 30h-8l-6-19-6 19h-8z' fill='%23f5b800'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23111'/%3E%3Cpath d='M34 50h22l14 62 20-62 20 62 14-62h22l-25 84h-22l-17-53-17 53h-22z' fill='%23f5b800'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
 <style>
 :root{
   --bg:#efeee9; --card:#ffffff; --ink:#1b1b1b; --muted:#6b6a66; --line:#dcdad3;
@@ -139,6 +140,7 @@ textarea{min-height:70px}
 <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 /* ===================== CONFIG / CONSTANTS ===================== */
+const APP_VERSION='1.1.0';
 const LS_KEY='wf_hours_v1', LS_ME='wf_hours_me', LS_FB='wf_hours_fb';
 const COLS=['employees','jobs','entries','equipment','equiplogs'];
 const TASKS=['Footings','Walls / forming','Rebar','Pour','Stripping forms','Flatwork','Finishing','Backfill / prep','Drive time','Shop / yard','Other'];
@@ -772,10 +774,11 @@ function viewSettings(){
   <div><label class="f">Workers clock in by</label><select onchange="Store.setting('requireQR',this.value==='1')"><option value="1" ${st.requireQR?'selected':''}>QR scan only</option><option value="0" ${!st.requireQR?'selected':''}>QR or pick from list</option></select></div></div>
   <label class="f">App link (used in QR codes)</label><input value="${esc(st.baseUrl)}" placeholder="${esc(location.href.split('?')[0])}" onchange="Store.setting('baseUrl',this.value.trim())">
   <p class="muted small">Leave blank to use this page's address. Set it to the hosted address (e.g. GitHub Pages) before printing posters.</p></div>
+  ${installCard()}
   <div class="card"><div class="lbl">Crew sync (Firebase)</div>
   ${UI.mode==='firebase'?`<p><span class="good">Connected</span> as ${esc(FB.user?.email)}.</p><button class="btn" onclick="if(confirm('Disconnect this device from crew sync and go back to demo data?')){localStorage.removeItem('${LS_FB}');location.reload()}">Disconnect this device</button>`:
   `<p class="muted small">Paste the Firebase web config (the <code>firebaseConfig = {…}</code> block) to switch from demo data to live crew sync with Google sign-in. Steps are in SETUP.md.</p><textarea id="fbcfg" placeholder="{ apiKey: '…', authDomain: '…', projectId: '…', … }">${esc(fb||'')}</textarea><button class="btn primary block" onclick="saveFb()">Connect crew sync</button>`}</div>
-  ${UI.mode==='local'?`<div class="card"><div class="lbl">Demo data</div><div class="row"><button class="btn" onclick="download('walker-hours-backup.json',JSON.stringify(S,null,1),'application/json')">⬇ Backup</button><button class="btn" onclick="$('#imp').click()">⬆ Restore</button><button class="btn danger" onclick="if(confirm('Reset all demo data?')){seed();render();toast('Demo data reset')}">Reset demo</button></div><input id="imp" type="file" accept=".json" hidden onchange="importBackup(this.files[0])"></div>`:''}`;
+  ${UI.mode==='local'?`<div class="card"><div class="lbl">Demo data</div><div class="row"><button class="btn" onclick="download('walker-hours-backup.json',JSON.stringify(S,null,1),'application/json')">⬇ Backup</button><button class="btn" onclick="$('#imp').click()">⬆ Restore</button><button class="btn danger" onclick="if(confirm('Reset all demo data?')){seed();render();toast('Demo data reset')}">Reset demo</button></div><input id="imp" type="file" accept=".json" hidden onchange="importBackup(this.files[0])"></div>`:''}<p class="muted small center">Crew Hours v${APP_VERSION}${navigator.serviceWorker?.controller?' · works offline':''}</p>`;
 }
 function saveFb(){
   let t=$('#fbcfg').value.trim();const m=t.match(/\{[\s\S]*\}/);if(!m){toast('Paste the whole { … } config');return}
@@ -787,6 +790,29 @@ function importBackup(f){if(!f)return;const r=new FileReader();r.onload=()=>{try
 /* ---------- MODAL ---------- */
 function openModal(html){const m=$('#modal');m.innerHTML=`<div class="sheet">${html}</div>`;m.classList.add('open')}
 function closeModal(){stopScan();const m=$('#modal');m.classList.remove('open');m.innerHTML=''}
+
+/* ===================== INSTALL / OFFLINE ===================== */
+let installEvt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(UI.tab==='settings')render()});
+window.addEventListener('appinstalled',()=>{installEvt=null;toast('Installed — find Crew Hours on your home screen')});
+const isInstalled=()=>navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+function installCard(){
+  if(isInstalled())return `<div class="card"><div class="lbl">Install</div><p class="good" style="margin:0">Installed on this device — opens with no signal.</p></div>`;
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  return `<div class="card"><div class="lbl">Install on this phone</div>
+  ${installEvt?`<button class="btn primary xl" onclick="doInstall()">Install Crew Hours</button>`:
+  ios?`<p style="margin:0">In Safari, tap <b>Share</b> <span class="muted">(square with arrow)</span> → <b>Add to Home Screen</b> → <b>Add</b>.</p>`:
+  `<p style="margin:0">In Chrome, tap the <b>⋮</b> menu → <b>Install app</b> (or <b>Add to Home screen</b>).</p>`}
+  <p class="muted small">Once installed it opens like a regular app, even with no signal.</p></div>`;
+}
+async function doInstall(){if(!installEvt)return;installEvt.prompt();await installEvt.userChoice.catch(()=>{});installEvt=null;render()}
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      reg.addEventListener('updatefound',()=>{const w=reg.installing;w&&w.addEventListener('statechange',()=>{if(w.state==='activated'&&navigator.serviceWorker.controller)toast('App updated — reopen to see changes')})});
+    }).catch(()=>{});
+  });
+}
 
 /* ===================== BOOT ===================== */
 (async function boot(){

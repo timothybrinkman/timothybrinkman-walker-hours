@@ -5,11 +5,26 @@ One file (`index.html`). Opens in demo mode with sample crews, jobs, and two wee
 ## 1. Host it (GitHub Pages)
 QR codes need a real web address, so a local file won't work for posters.
 
-1. Create a repo, e.g. `timothybrinkman/walker-hours`.
-2. Upload `index.html` to the root.
-3. Repo **Settings → Pages → Deploy from branch → main / root**.
-4. App lives at `https://timothybrinkman.github.io/walker-hours/`.
-5. On iPhone: open in Safari → Share → **Add to Home Screen**. Android: Chrome menu → **Install app**.
+Upload these to the root of your repo (keep the `icons` folder as a folder):
+```
+index.html
+manifest.json
+sw.js
+icons/icon-192.png
+icons/icon-512.png
+icons/icon-maskable-512.png
+icons/apple-touch-icon.png
+```
+Repo **Settings → Pages → Deploy from branch → main / root**. App lives at `https://timothybrinkman.github.io/<repo>/`.
+
+### Install it on a phone
+- **iPhone / iPad:** open the link in **Safari** → **Share** → **Add to Home Screen** → **Add**.
+- **Android:** open in **Chrome** → **⋮** menu → **Install app**. (Office users: Settings tab has an **Install** button when Chrome offers it.)
+
+Open it once with signal after installing. After that it opens with no signal, and QR poster links work offline too.
+
+### Pushing an update
+Change `VERSION` at the top of `sw.js` (e.g. `crew-hours-v1.1.1`) every time you upload a new `index.html`. Installed phones grab the new version the next time they open with signal and show "App updated — reopen to see changes." Saved hours are never touched by an update.
 
 ## 2. Demo mode (for the pitch)
 - First screen asks "Who's using this phone?" — pick a worker, a foreman, or **Jill Hansen (office)** to show each view. Tap the name chip at top right to switch.
@@ -23,7 +38,9 @@ QR codes need a real web address, so a local file won't work for posters.
 5. Foremen see who's on the clock, can clock out someone who forgot, and add/fix entries for their crew.
 6. Office: Dashboard, Timesheets (weekly grid, OT over 40), **Payroll CSV** and **Detail CSV**, Jobs with hours/cost breakdowns, Crew, Equipment service tracking.
 
-## 4. Turn on crew sync (Firebase)
+## 4. Turn on crew sync (Firebase) — for the customer, later
+Not needed for the demo. Without it, each phone keeps its own data.
+
 1. https://console.firebase.google.com → **Add project** (Analytics off is fine).
 2. **Build → Authentication → Get started → Google** → Enable.
    Authentication → **Settings → Authorized domains** → add `timothybrinkman.github.io`.
